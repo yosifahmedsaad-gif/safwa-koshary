@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المطبخ - كشري الصفوة | Kitchen Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800;900&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════
+   CSS CUSTOM PROPERTIES
+   ══════════════════════════════════════════ */
+:root {
+  --gold: #FFBE1A;
+  --gold-deep: #D49B00;
+  --red: #E62222;
+  --red-deep: #B51515;
+  --green: #25D366;
+  --green-deep: #128C7E;
+  --black: #0D0D11;
+  --slate: #1A1A24;
+  --white: #FAFAFA;
+
+  --bg: #0D0D11;
+  --bg2: #1A1A24;
+  --surface: #22222E;
+  --surface2: #2A2A38;
+  --text: #F1F1F1;
+  --text2: #A0A0B0;
+  --border: rgba(255,255,255,0.06);
+  --glass-bg: rgba(26,26,36,0.75);
+  --glass-border: rgba(255,190,26,0.12);
+  --shadow: rgba(0,0,0,0.5);
+  --overlay: rgba(0,0,0,0.7);
+}
+
+[data-theme="light"] {
+  --bg: #F5F3EF;
+  --bg2: #FFFFFF;
+  --surface: #FFFFFF;
+  --surface2: #F0ECE5;
+  --text: #1A1A24;
+  --text2: #6B6B7B;
+  --border: rgba(0,0,0,0.08);
+  --glass-bg: rgba(255,255,255,0.8);
+  --glass-border: rgba(212,155,0,0.2);
+  --shadow: rgba(0,0,0,0.1);
+  --overlay: rgba(0,0,0,0.4);
+}
+
+/* ══════════════════════════════════════════
+   RESET & BASE
+   ══════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Cairo', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  transition: background 0.5s, color 0.4s;
+}
+
+/* ══════════════════════════════════════════
+   ANIMATIONS
+   ══════════════════════════════════════════ */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-40px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulseRed {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(230,34,34,0.5); }
+  50%      { box-shadow: 0 0 0 12px rgba(230,34,34,0); }
+}
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(37,211,102,0.4); }
+  50%      { box-shadow: 0 0 0 10px rgba(37,211,102,0); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes bellShake {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(14deg); }
+  30% { transform: rotate(-12deg); }
+  45% { transform: rotate(10deg); }
+  60% { transform: rotate(-8deg); }
+  75% { transform: rotate(4deg); }
+}
+@keyframes flash {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0.4; }
+}
+@keyframes countUp {
+  from { transform: scale(1.4); opacity: 0.5; }
+  to   { transform: scale(1); opacity: 1; }
+}
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+/* ══════════════════════════════════════════
+   LAYOUT
+   ══════════════════════════════════════════ */
+.app {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .sidebar { border-top: 1px solid var(--border); border-right: none !important; border-left: none !important; }
+}
+
+/* ══════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════ */
+.kds-header {
+  grid-column: 1 / -1;
+  background: var(--glass-bg);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--glass-border);
+  padding: 14px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.kds-title {
+  display: flex; align-items: center; gap: 10px;
+  font-size: 1.3rem; font-weight: 900;
+  color: var(--gold);
+}
+.kds-title .fire { font-size: 1.5rem; }
+
+.header-meta {
+  display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+}
+
+.live-clock {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 1px;
+  direction: ltr;
+}
+.live-clock .seconds {
+  color: var(--gold);
+  font-size: 1rem;
+}
+
+.pending-count {
+  background: var(--red);
+  color: #fff;
+  padding: 6px 16px;
+  border-radius: 50px;
+  font-weight: 800;
+  font-size: 0.88rem;
+  animation: countUp 0.4s ease;
+}
+
+.btn-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 700;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex; align-items: center; gap: 6px;
+}
+.btn-header:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 15px rgba(255,190,26,0.15);
+}
+.btn-header.audio-on {
+  border-color: var(--green);
+  color: var(--green);
+}
+.bell { display: inline-block; }
+.bell.ringing { animation: bellShake 0.6s ease; }
+
+/* ══════════════════════════════════════════
+   ORDERS FEED (Main Area)
+   ══════════════════════════════════════════ */
+.orders-feed {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feed-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--text2);
+  margin-bottom: 4px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.order-ticket {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 18px;
+  animation: slideDown 0.5s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  transition: all 0.4s;
+  position: relative;
+  overflow: hidden;
+}
+.order-ticket::before {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  width: 4px;
+  border-radius: 4px 0 0 4px;
+}
+[dir="rtl"] .order-ticket::before { right: 0; }
+[dir="ltr"] .order-ticket::before { left: 0; }
+
+.order-ticket.type-phone {
+  border-color: rgba(230,34,34,0.3);
+  animation: slideDown 0.5s cubic-bezier(0.34,1.2,0.64,1) both, pulseRed 2s ease infinite;
+}
+.order-ticket.type-phone::before { background: var(--red); }
+
+.order-ticket.type-whatsapp {
+  border-color: rgba(37,211,102,0.2);
+}
+.order-ticket.type-whatsapp::before { background: var(--green); }
+
+.ticket-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  margin-bottom: 12px; flex-wrap: wrap; gap: 8px;
+}
+
+.ticket-type-badge {
+  padding: 4px 12px;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  display: flex; align-items: center; gap: 5px;
+}
+.badge-phone {
+  background: rgba(230,34,34,0.15);
+  color: var(--red);
+  border: 1px solid rgba(230,34,34,0.3);
+}
+.badge-whatsapp {
+  background: rgba(37,211,102,0.12);
+  color: var(--green);
+  border: 1px solid rgba(37,211,102,0.25);
+}
+
+.ticket-time {
+  font-size: 0.78rem;
+  color: var(--text2);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  direction: ltr;
+}
+
+.phone-alert {
+  background: rgba(230,34,34,0.08);
+  border: 1px solid rgba(230,34,34,0.2);
+  border-radius: 10px;
+  padding: 8px 12px;
+  margin-bottom: 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--red);
+  animation: flash 1.5s ease infinite;
+  text-align: center;
+}
+
+.ticket-items {
+  margin-bottom: 14px;
+}
+.ticket-item-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.9rem;
+}
+.ticket-item-row:last-child { border-bottom: none; }
+.item-name { font-weight: 700; display: flex; align-items: center; gap: 6px; }
+.item-qty { color: var(--text2); font-weight: 600; }
+.item-price { color: var(--gold); font-weight: 800; }
+
+.ticket-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-top: 4px; flex-wrap: wrap; gap: 8px;
+}
+
+.ticket-total {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+.btn-done {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--green), var(--green-deep));
+  color: #fff;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 800;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+  overflow: hidden;
+}
+.btn-done::before {
+  content: '';
+  position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: shimmer 3s ease infinite;
+}
+.btn-done:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 20px rgba(37,211,102,0.4);
+}
+
+.ticket-completed {
+  opacity: 0.4;
+  transform: scale(0.97);
+  pointer-events: none;
+}
+.ticket-completed .btn-done { display: none; }
+.ticket-completed .ticket-total::after {
+  content: ' ✅';
+}
+
+.empty-feed {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text2);
+  font-size: 1.1rem;
+}
+.empty-feed .big-emoji { font-size: 4rem; margin-bottom: 16px; display: block; }
+
+/* ══════════════════════════════════════════
+   SIDEBAR (Menu Management)
+   ══════════════════════════════════════════ */
+.sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+[dir="ltr"] .sidebar { border-right: none; border-left: 1px solid var(--border); }
+
+.sidebar-title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--gold);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.form-group { margin-bottom: 10px; }
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text2);
+  margin-bottom: 4px;
+}
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'Cairo', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: border-color 0.3s;
+}
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(255,190,26,0.1);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 11px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+  color: #000;
+  font-family: 'Cairo', sans-serif;
+  font-weight: 800;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative; overflow: hidden;
+}
+.btn-submit::before {
+  content: '';
+  position: absolute; top: 0; left: -100%;
+  width: 100%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  animation: shimmer 3s ease infinite;
+}
+.btn-submit:hover {
+  box-shadow: 0 4px 20px rgba(255,190,26,0.35);
+  transform: translateY(-1px);
+}
+
+.menu-list {
+  display: flex; flex-direction: column; gap: 8px;
+}
+
+.menu-item-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.3s;
+  animation: fadeIn 0.4s ease both;
+}
+.menu-item-card:hover {
+  border-color: var(--glass-border);
+}
+
+.menu-item-info {
+  flex: 1;
+  min-width: 0;
+}
+.menu-item-name {
+  font-weight: 800;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.menu-item-price {
+  font-size: 0.78rem;
+  color: var(--gold);
+  font-weight: 700;
+}
+
+.menu-item-actions {
+  display: flex; gap: 6px;
+}
+.btn-icon {
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text2);
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.btn-icon:hover { border-color: var(--gold); color: var(--gold); }
+.btn-icon.danger:hover { border-color: var(--red); color: var(--red); }
+
+/* ══════════════════════════════════════════
+   STATS BAR
+   ══════════════════════════════════════════ */
+.stats-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+}
+.stat-value {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: var(--gold);
+}
+.stat-label {
+  font-size: 0.7rem;
+  color: var(--text2);
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════
+   NEW ORDER FLASH
+   ══════════════════════════════════════════ */
+.new-order-flash {
+  position: fixed; inset: 0;
+  background: rgba(255,190,26,0.06);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.new-order-flash.active {
+  opacity: 1;
+  animation: fadeIn 0.2s ease, fadeIn 0.2s ease 0.3s reverse both;
+}
+
+/* ══════════════════════════════════════════
+   TOAST
+   ══════════════════════════════════════════ */
+.toast {
+  position: fixed; bottom: 30px; left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(16px);
+  color: var(--text);
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-weight: 700; font-size: 0.88rem;
+  box-shadow: 0 8px 30px var(--shadow);
+  opacity: 0; visibility: hidden;
+  transition: all 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);
+  z-index: 10000;
+  white-space: nowrap;
+}
+.toast.show {
+  opacity: 1; visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════ */
+@media (max-width: 900px) {
+  .app { grid-template-columns: 1fr; }
+  .stats-bar { grid-template-columns: repeat(3, 1fr); }
+  .kds-header { padding: 10px 14px; }
+  .kds-title { font-size: 1.05rem; }
+  .live-clock { font-size: 1.2rem; }
+}
+@media (max-width: 500px) {
+  .stats-bar { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="new-order-flash" id="flashOverlay"></div>
+
+<div class="app">
+  <!-- ═══════════ HEADER ═══════════ -->
+  <header class="kds-header">
+    <div class="kds-title">
+      <span class="fire">🔥</span>
+      لوحة المطبخ - كشري الصفوة
+    </div>
+    <div class="header-meta">
+      <div class="live-clock" id="liveClock">00:00:<span class="seconds">00</span></div>
+      <div class="pending-count" id="pendingBadge">0 طلبات معلقة</div>
+      <button class="btn-header" id="audioBtn" onclick="toggleAudio()">
+        <span class="bell" id="bellIcon">🔔</span>
+        <span id="audioLabel">تفعيل الصوت</span>
+      </button>
+      <button class="btn-header" onclick="toggleTheme()" id="themeBtn">🌙</button>
+      <button class="btn-header" onclick="clearCompleted()">🧹 مسح المكتمل</button>
+    </div>
+  </header>
+
+  <!-- ═══════════ ORDERS FEED ═══════════ -->
+  <main class="orders-feed" id="ordersFeed">
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card">
+        <div class="stat-value" id="statPending">0</div>
+        <div class="stat-label">طلبات معلقة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statCompleted">0</div>
+        <div class="stat-label">طلبات مكتملة</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="statRevenue">0</div>
+        <div class="stat-label">إيراد اليوم (ج.م)</div>
+      </div>
+    </div>
+    <div class="feed-title">📋 تدفق الطلبات الحيّة</div>
+    <div id="ticketsList"></div>
+  </main>
+
+  <!-- ═══════════ SIDEBAR (Menu Mgmt) ═══════════ -->
+  <aside class="sidebar">
+    <div class="sidebar-title">📝 إدارة قائمة الطعام</div>
+
+    <form id="menuForm" onsubmit="handleMenuSubmit(event)">
+      <div class="form-group">
+        <label>اسم الصنف (عربي)</label>
+        <input type="text" id="fNameAr" required>
+      </div>
+      <div class="form-group">
+        <label>Item Name (English)</label>
+        <input type="text" id="fNameEn" required>
+      </div>
+      <div class="form-group">
+        <label>الوصف (عربي)</label>
+        <input type="text" id="fDescAr">
+      </div>
+      <div class="form-group">
+        <label>Description (English)</label>
+        <input type="text" id="fDescEn">
+      </div>
+      <div class="form-group">
+        <label>السعر (EGP)</label>
+        <input type="number" id="fPrice" min="1" step="0.5" required>
+      </div>
+      <div class="form-group">
+        <label>التصنيف</label>
+        <select id="fCategory">
+          <option value="royal">كشري ملكي</option>
+          <option value="tajin">طواجن</option>
+          <option value="classic">كلاسيك</option>
+          <option value="dessert">حلويات</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>الإيموجي</label>
+        <input type="text" id="fEmoji" value="🍛" maxlength="4">
+      </div>
+      <button type="submit" class="btn-submit" id="formSubmitBtn">➕ إضافة صنف جديد</button>
+      <button type="button" class="btn-header hidden" id="cancelEditBtn" onclick="cancelEdit()" style="width:100%;margin-top:8px;justify-content:center;">✕ إلغاء التعديل</button>
+    </form>
+
+    <div>
+      <div class="sidebar-title" style="margin-bottom:10px;">📦 الأصناف الحالية (<span id="menuCount">0</span>)</div>
+      <div class="menu-list" id="menuList"></div>
+    </div>
+  </aside>
+</div>
+
+<!-- ═══════════ TOAST ═══════════ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ══════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════ */
+let orders = JSON.parse(localStorage.getItem('safwa_orders') || '[]');
+let menu = JSON.parse(localStorage.getItem('safwa_menu') || '[]');
+let audioEnabled = false;
+let audioCtx = null;
+let theme = localStorage.getItem('safwa_theme') || 'dark';
+let editingId = null;
+let lastKnownSignal = localStorage.getItem('safwa_order_signal') || '';
+
+/* ══════════════════════════════════════════
+   UTILITIES
+   ══════════════════════════════════════════ */
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2500);
+}
+
+function flashScreen() {
+  const f = document.getElementById('flashOverlay');
+  f.classList.add('active');
+  setTimeout(() => f.classList.remove('active'), 600);
+}
+
+function formatTime(iso) {
+  const d = new Date(iso);
+  return d.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+}
+
+/* ══════════════════════════════════════════
+   LIVE CLOCK
+   ══════════════════════════════════════════ */
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2, '0');
+  const m = String(now.getMinutes()).padStart(2, '0');
+  const s = String(now.getSeconds()).padStart(2, '0');
+  document.getElementById('liveClock').innerHTML = `${h}:${m}:<span class="seconds">${s}</span>`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ══════════════════════════════════════════
+   THEME
+   ══════════════════════════════════════════ */
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', theme);
+  document.getElementById('themeBtn').textContent = theme === 'dark' ? '🌙' : '☀️';
+}
+function toggleTheme() {
+  theme = theme === 'dark' ? 'light' : 'dark';
+  applyTheme();
+  localStorage.setItem('safwa_theme', theme);
+}
+
+/* ══════════════════════════════════════════
+   WEB AUDIO API - CHIME ENGINE
+   ══════════════════════════════════════════ */
+function initAudio() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+}
+
+function playChime() {
+  if (!audioEnabled || !audioCtx) return;
+
+  // Create a pleasant two-tone chime
+  const now = audioCtx.currentTime;
+
+  // Tone 1
+  const osc1 = audioCtx.createOscillator();
+  const gain1 = audioCtx.createGain();
+  osc1.type = 'sine';
+  osc1.frequency.setValueAtTime(880, now); // A5
+  gain1.gain.setValueAtTime(0.3, now);
+  gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+  osc1.connect(gain1);
+  gain1.connect(audioCtx.destination);
+  osc1.start(now);
+  osc1.stop(now + 0.5);
+
+  // Tone 2
+  const osc2 = audioCtx.createOscillator();
+  const gain2 = audioCtx.createGain();
+  osc2.type = 'sine';
+  osc2.frequency.setValueAtTime(1108.73, now + 0.15); // C#6
+  gain2.gain.setValueAtTime(0.25, now + 0.15);
+  gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.7);
+  osc2.connect(gain2);
+  gain2.connect(audioCtx.destination);
+  osc2.start(now + 0.15);
+  osc2.stop(now + 0.7);
+
+  // Tone 3 - higher
+  const osc3 = audioCtx.createOscillator();
+  const gain3 = audioCtx.createGain();
+  osc3.type = 'sine';
+  osc3.frequency.setValueAtTime(1318.51, now + 0.3); // E6
+  gain3.gain.setValueAtTime(0.2, now + 0.3);
+  gain3.gain.exponentialRampToValueAtTime(0.01, now + 0.9);
+  osc3.connect(gain3);
+  gain3.connect(audioCtx.destination);
+  osc3.start(now + 0.3);
+  osc3.stop(now + 0.9);
+}
+
+function toggleAudio() {
+  initAudio();
+  audioEnabled = !audioEnabled;
+  const btn = document.getElementById('audioBtn');
+  const label = document.getElementById('audioLabel');
+  const bell = document.getElementById('bellIcon');
+
+  if (audioEnabled) {
+    btn.classList.add('audio-on');
+    label.textContent = 'الصوت مفعّل ✓';
+    bell.classList.add('ringing');
+    setTimeout(() => bell.classList.remove('ringing'), 600);
+    playChime(); // Test chime
+    showToast('🔔 تم تفعيل التنبيه الصوتي');
+  } else {
+    btn.classList.remove('audio-on');
+    label.textContent = 'تفعيل الصوت';
+    showToast('🔕 تم إيقاف الصوت');
+  }
+}
+
+/* ══════════════════════════════════════════
+   RENDER ORDERS FEED
+   ══════════════════════════════════════════ */
+function renderOrders() {
+  const container = document.getElementById('ticketsList');
+
+  if (orders.length === 0) {
+    container.innerHTML = `<div class="empty-feed">
+      <span class="big-emoji">🍳</span>
+      في انتظار الطلبات...<br>الطلبات الجديدة هتظهر هنا لحظياً
+    </div>`;
+    updateStats();
+    return;
+  }
+
+  container.innerHTML = '';
+
+  orders.forEach((order, idx) => {
+    const ticket = document.createElement('div');
+    const isPhone = order.type === 'phone';
+    const isCompleted = order.status === 'completed';
+
+    ticket.className = `order-ticket type-${order.type}${isCompleted ? ' ticket-completed' : ''}`;
+    ticket.style.animationDelay = `${idx * 0.05}s`;
+
+    let itemsHTML = '';
+    (order.items || []).forEach(item => {
+      itemsHTML += `
+        <div class="ticket-item-row">
+          <span class="item-name">${item.emoji || '🍛'} ${item.nameAr}</span>
+          <span class="item-qty">× ${item.qty}</span>
+          <span class="item-price">${item.price * item.qty} ج.م</span>
+        </div>`;
+    });
+
+    ticket.innerHTML = `
+      <div class="ticket-header">
+        <span class="ticket-type-badge ${isPhone ? 'badge-phone' : 'badge-whatsapp'}">
+          ${isPhone ? '📞 مكالمة هاتفية' : '💬 طلب واتساب'}
+        </span>
+        <span class="ticket-time">${formatTime(order.timestamp)}</span>
+      </div>
+      ${isPhone && !isCompleted ? '<div class="phone-alert">📞 تنبيه: الزبون يرنّ عليك الآن لنفس الطلب!</div>' : ''}
+      <div class="ticket-items">${itemsHTML}</div>
+      <div class="ticket-footer">
+        <span class="ticket-total">💰 ${order.total} ج.م</span>
+        ${!isCompleted ? `<button class="btn-done" onclick="completeOrder('${order.id}')">✅ تم التجهيز</button>` : ''}
+      </div>`;
+
+    container.appendChild(ticket);
+  });
+
+  updateStats();
+}
+
+function updateStats() {
+  const pending = orders.filter(o => o.status === 'pending').length;
+  const completed = orders.filter(o => o.status === 'completed').length;
+  const revenue = orders.filter(o => o.status === 'completed').reduce((s, o) => s + (o.total || 0), 0);
+
+  document.getElementById('statPending').textContent = pending;
+  document.getElementById('statCompleted').textContent = completed;
+  document.getElementById('statRevenue').textContent = revenue;
+
+  const badge = document.getElementById('pendingBadge');
+  badge.textContent = `${pending} طلبات معلقة`;
+  badge.style.animation = 'none';
+  badge.offsetHeight;
+  badge.style.animation = 'countUp 0.4s ease';
+
+  // Page title badge
+  document.title = pending > 0 ? `(${pending}) المطبخ - كشري الصفوة` : 'المطبخ - كشري الصفوة';
+}
+
+function completeOrder(id) {
+  const idx = orders.findIndex(o => String(o.id) === String(id));
+  if (idx === -1) return;
+  orders[idx].status = 'completed';
+  localStorage.setItem('safwa_orders', JSON.stringify(orders));
+  renderOrders();
+  showToast('✅ تم تجهيز الطلب بنجاح');
+}
+
+function clearCompleted() {
+  const before = orders.length;
+  orders = orders.filter(o => o.status !== 'completed');
+  localStorage.setItem('safwa_orders', JSON.stringify(orders));
+  renderOrders();
+  const removed = before - orders.length;
+  if (removed > 0) showToast(`🧹 تم مسح ${removed} طلبات مكتملة`);
+  else showToast('لا توجد طلبات مكتملة للمسح');
+}
+
+/* ══════════════════════════════════════════
+   MENU MANAGEMENT
+   ══════════════════════════════════════════ */
+function renderMenuList() {
+  const list = document.getElementById('menuList');
+  document.getElementById('menuCount').textContent = menu.length;
+
+  if (menu.length === 0) {
+    list.innerHTML = '<p style="text-align:center;color:var(--text2);padding:20px;font-size:0.85rem;">لا توجد أصناف</p>';
+    return;
+  }
+
+  list.innerHTML = '';
+  menu.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'menu-item-card';
+    card.innerHTML = `
+      <div class="menu-item-info">
+        <div class="menu-item-name">${item.emoji || '🍛'} ${item.nameAr}</div>
+        <div class="menu-item-price">${item.price} EGP</div>
+      </div>
+      <div class="menu-item-actions">
+        <button class="btn-icon" onclick="editMenuItem(${item.id})" title="تعديل">✏️</button>
+        <button class="btn-icon danger" onclick="deleteMenuItem(${item.id})" title="حذف">🗑️</button>
+      </div>`;
+    list.appendChild(card);
+  });
+}
+
+function handleMenuSubmit(e) {
+  e.preventDefault();
+
+  const data = {
+    nameAr: document.getElementById('fNameAr').value.trim(),
+    nameEn: document.getElementById('fNameEn').value.trim(),
+    descAr: document.getElementById('fDescAr').value.trim(),
+    descEn: document.getElementById('fDescEn').value.trim(),
+    price: parseFloat(document.getElementById('fPrice').value),
+    category: document.getElementById('fCategory').value,
+    emoji: document.getElementById('fEmoji').value.trim() || '🍛'
+  };
+
+  if (editingId) {
+    const idx = menu.findIndex(m => m.id === editingId);
+    if (idx !== -1) {
+      menu[idx] = { ...menu[idx], ...data };
+      showToast('✅ تم تحديث الصنف');
+    }
+    cancelEdit();
+  } else {
+    menu.push({ id: Date.now(), ...data });
+    showToast('✅ تمت إضافة الصنف');
+  }
+
+  localStorage.setItem('safwa_menu', JSON.stringify(menu));
+  renderMenuList();
+  document.getElementById('menuForm').reset();
+  document.getElementById('fEmoji').value = '🍛';
+}
+
+function editMenuItem(id) {
+  const item = menu.find(m => m.id === id);
+  if (!item) return;
+
+  editingId = id;
+  document.getElementById('fNameAr').value = item.nameAr;
+  document.getElementById('fNameEn').value = item.nameEn;
+  document.getElementById('fDescAr').value = item.descAr || '';
+  document.getElementById('fDescEn').value = item.descEn || '';
+  document.getElementById('fPrice').value = item.price;
+  document.getElementById('fCategory').value = item.category || 'classic';
+  document.getElementById('fEmoji').value = item.emoji || '🍛';
+
+  document.getElementById('formSubmitBtn').textContent = '✏️ تحديث الصنف';
+  document.getElementById('cancelEditBtn').classList.remove('hidden');
+  document.getElementById('menuForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+function cancelEdit() {
+  editingId = null;
+  document.getElementById('menuForm').reset();
+  document.getElementById('fEmoji').value = '🍛';
+  document.getElementById('formSubmitBtn').textContent = '➕ إضافة صنف جديد';
+  document.getElementById('cancelEditBtn').classList.add('hidden');
+}
+
+function deleteMenuItem(id) {
+  if (!confirm('هل أنت متأكد من حذف هذا الصنف؟')) return;
+  menu = menu.filter(m => m.id !== id);
+  localStorage.setItem('safwa_menu', JSON.stringify(menu));
+  renderMenuList();
+  showToast('🗑️ تم حذف الصنف');
+}
+
+/* ══════════════════════════════════════════
+   LIVE SYNC ENGINE
+   ══════════════════════════════════════════ */
+
+// Method 1: Storage event listener (cross-tab instant sync)
+window.addEventListener('storage', (e) => {
+  if (e.key === 'safwa_orders') {
+    const newOrders = JSON.parse(e.newValue || '[]');
+    const hadNew = newOrders.length > orders.length;
+    orders = newOrders;
+    renderOrders();
+    if (hadNew) {
+      onNewOrder();
+    }
+  }
+  if (e.key === 'safwa_menu') {
+    menu = JSON.parse(e.newValue || '[]');
+    renderMenuList();
+  }
+  if (e.key === 'safwa_order_signal') {
+    // Redundant safety check
+    const freshOrders = JSON.parse(localStorage.getItem('safwa_orders') || '[]');
+    if (freshOrders.length > orders.length) {
+      orders = freshOrders;
+      renderOrders();
+      onNewOrder();
+    }
+  }
+});
+
+// Method 2: Periodic poller as fallback (every 2s)
+setInterval(() => {
+  const sig = localStorage.getItem('safwa_order_signal') || '';
+  if (sig !== lastKnownSignal) {
+    lastKnownSignal = sig;
+    const freshOrders = JSON.parse(localStorage.getItem('safwa_orders') || '[]');
+    if (freshOrders.length !== orders.length || JSON.stringify(freshOrders) !== JSON.stringify(orders)) {
+      const hadNew = freshOrders.length > orders.length;
+      orders = freshOrders;
+      renderOrders();
+      if (hadNew) onNewOrder();
+    }
+  }
+  // Also refresh menu
+  const freshMenu = JSON.parse(localStorage.getItem('safwa_menu') || '[]');
+  if (JSON.stringify(freshMenu) !== JSON.stringify(menu)) {
+    menu = freshMenu;
+    renderMenuList();
+  }
+}, 2000);
+
+function onNewOrder() {
+  playChime();
+  flashScreen();
+
+  // Shake bell
+  const bell = document.getElementById('bellIcon');
+  bell.classList.add('ringing');
+  setTimeout(() => bell.classList.remove('ringing'), 600);
+}
+
+/* ══════════════════════════════════════════
+   HIDDEN UTILITY CLASS
+   ══════════════════════════════════════════ */
+// CSS class
+document.head.insertAdjacentHTML('beforeend', '<style>.hidden{display:none!important}</style>');
+
+/* ══════════════════════════════════════════
+   INITIALIZE
+   ══════════════════════════════════════════ */
+(function init() {
+  applyTheme();
+  renderOrders();
+  renderMenuList();
+})();
+</script>
+</body>
+</html>
